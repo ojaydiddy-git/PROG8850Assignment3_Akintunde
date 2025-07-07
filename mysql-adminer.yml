@@ -1,0 +1,21 @@
+services:
+
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Secret5555
+    # (this is just an example, not intended to be a production configuration)
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql_db_data:/var/lib/mysql
+  adminer_container:
+    image: adminer:latest
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql_db_container
+    ports:
+      - 8080:8080
+
+volumes:
+  mysql_db_data:
