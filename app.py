@@ -1,29 +1,39 @@
-##Flask app for testing selenium and MySQL database---Optional
-
-#app.py
-
-from flask import Flask, request, render_template_string
-import mysql.connector
+from flask import Flask, request
+from dotenv import load_dotenv
 import os
+import MySQLdb
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 
 # Database connection
 def get_db_connection():
-    return mysql.connector.connect(
-        user= os.environ.get("DB_USER",  "root"),
-        password=os.environ.get("DB_PASSWORD", "Secret5555"),
-        host= os.environ.get("DB_HOST", "127.0.0.1"),
-        database=os.environ.get("DB_NAME", "firstdatabase")
+    return MySQLdb.connect(
+        host=os.getenv("DATABASE_HOST"),
+        user=os.getenv("DATABASE_USERNAME"),
+        passwd=os.getenv("DATABASE_PASSWORD"),
+        db=os.getenv("DATABASE"),
+        autocommit=True,
+        ssl_mode="VERIFY_IDENTITY",
+        ssl={ "ca": "/etc/ssl/certs/ca-certificates.crt" }  # This path works in Codespaces
     )
 
-# Simple login page
+# Home route
+@app.route('/')
+def index():
+    return '''
+        <h2>Welcome to the Login App</h2>
+        <p><a href="/login">Go to Login</a></p>
+    '''
+
+# Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # For demonstration, assume login is successful and insert into the database
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
@@ -41,4 +51,3 @@ def login():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
